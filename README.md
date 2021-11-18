@@ -1,2 +1,2 @@
-# spim2
-electric boogaloo
+# Superbad
+spim 2 electric boogaloo
