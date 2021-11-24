@@ -187,6 +187,7 @@ void print_binary(BIT *A)
 void convert_to_binary(int a, BIT *A, int length)
 {
   /* Use your implementation from Lab 6 */
+  memset(A, '\0', length);
   for (int i = 0; i < length; i++)
   {
     A[i] = a & 1;
@@ -223,6 +224,116 @@ int binary_to_integer(BIT *A)
 /******************************************************************************/
 
 // TODO: Implement any helper functions to assist with parsing
+int get_opcode(char *instruction)
+{
+  if (strcmp(instruction, "lw") == 0)
+  {
+    return 35;
+  }
+  else if (strcmp(instruction, "sw") == 0)
+  {
+    return 43;
+  }
+  else if (strcmp(instruction, "addi") == 0)
+  {
+    return 8;
+  }
+  else if (strcmp(instruction, "beq") == 0)
+  {
+    return 4;
+  }
+  else if (strcmp(instruction, "j") == 0)
+  {
+    return 2;
+  }
+  else if (strcmp(instruction, "jal") == 0)
+  {
+    return 3;
+  }
+  {
+    //R-type instructions and jr
+    return 0;
+  }
+}
+int get_register_number(char *reg)
+/*Returns the register number associated with the formatted register*/
+{
+  if (strcmp(reg, "zero") == 0)
+  {
+    return 0;
+  }
+  else if (strcmp(reg, "v0") == 0)
+  {
+    return 2;
+  }
+  else if (strcmp(reg, "a0") == 0)
+  {
+    return 4;
+  }
+  else if (strcmp(reg, "t0") == 0)
+  {
+    return 8;
+  }
+  else if (strcmp(reg, "t1") == 0)
+  {
+    return 9;
+  }
+  else if (strcmp(reg, "a0") == 0)
+  {
+    return 4;
+  }
+  else if (strcmp(reg, "s0") == 0)
+  {
+    return 16;
+  }
+  else if (strcmp(reg, "s1") == 0)
+  {
+    return 17;
+  }
+  else if (strcmp(reg, "sp") == 0)
+  {
+    return 29;
+  }
+  else if (strcmp(reg, "ra") == 0)
+  {
+    return 31;
+  }
+  else
+  {
+    return -1;
+  }
+}
+int get_funct(char *instruction)
+{
+  if (strcmp(instruction, "add") == 0)
+  {
+    return 32;
+  }
+  else if (strcmp(instruction, "sub") == 0)
+  {
+    return 34;
+  }
+  else if (strcmp(instruction, "and") == 0)
+  {
+    return 36;
+  }
+  else if (strcmp(instruction, "or") == 0)
+  {
+    return 37;
+  }
+  else if (strcmp(instruction, "slt") == 0)
+  {
+    return 42;
+  }
+  else if (strcmp(instruction, "jr") == 0)
+  {
+    return 8;
+  }
+  else
+  {
+    return -1;
+  }
+}
 
 int get_instructions(BIT Instructions[][32])
 {
@@ -230,20 +341,159 @@ int get_instructions(BIT Instructions[][32])
   int instruction_count = 0;
   while (fgets(line, 256, stdin) != NULL)
   {
-    // TODO: perform conversion of instructions to binary
-    // Input: coming from stdin via: ./a.out < input.txt
-    // Output: Convert instructions to binary in the instruction memory
-    // Return: Total number of instructions
-    // Note: you are free to use if-else and external libraries here
-    // Note: you don't need to implement circuits for saving to inst. mem.
-    // My approach:
-    // - Use sscanf on line to get strings for instruction and registers
-    // - Use instructions to determine op code, funct, and shamt fields
-    // - Convert immediate field and jump address field to binary
-    // - Use registers to get rt, rd, rs fields
-    // Note: I parse everything as strings, then convert to BIT array at end
-  }
+    //Initialize string components of instruction
+    char instruction[16];
+    char dest[16];
+    char src1[16];
+    char src2[16];
+    memset(instruction, '\0', 16);
+    memset(dest, '\0', 16);
+    memset(src1, '\0', 16);
+    memset(src2, '\0', 16);
+    //Read components of instruction
+    sscanf(line, "%s %s %s %s", instruction, dest, src1, src2);
+    //Determine behavior of instruction
+    if (strcmp(instruction, "lw") == 0 || strcmp(instruction, "sw") == 0 ||
+        strcmp(instruction, "beq") == 0 || strcmp(instruction, "addi") == 0)
+    {
+      //I-type instructions
 
+      //Immediate
+      char *END = NULL;
+      int immediate = strtol(src2, &END, 10);
+      BIT *immediate_bits = malloc(16);
+      convert_to_binary(immediate, immediate_bits, 16);
+      //Reg2 - source 1
+      int reg2 = get_register_number(src1);
+      BIT *reg2_bits = malloc(5);
+      convert_to_binary(reg2, reg2_bits, 5);
+      //Reg1 - Destination
+      int reg1 = get_register_number(dest);
+      BIT *reg1_bits = malloc(5);
+      convert_to_binary(reg1, reg1_bits, 5);
+      //Opcode
+      int opcode = get_opcode(instruction);
+      BIT *opcode_bits = malloc(6);
+      convert_to_binary(opcode, opcode_bits, 6);
+      for (int i = 0; i < 16; i++)
+      {
+        Instructions[instruction_count][i] = immediate_bits[i];
+      }
+      for (int i = 0; i < 5; i++)
+      {
+        Instructions[instruction_count][i + 16] = reg2_bits[i];
+      }
+      for (int i = 0; i < 5; i++)
+      {
+        Instructions[instruction_count][i + 21] = reg1_bits[i];
+      }
+      for (int i = 0; i < 6; i++)
+      {
+        Instructions[instruction_count][i + 26] = opcode_bits[i];
+      }
+    }
+    else if (strcmp(instruction, "j") == 0 || strcmp(instruction, "jal") == 0)
+    {
+      //J-type instructions
+      //Immediate
+      char *END = NULL;
+      int immediate = strtol(dest, &END, 16);
+      BIT *immediate_bits = malloc(26);
+      convert_to_binary(immediate, immediate_bits, 26);
+      //Opcode
+      int opcode = get_opcode(instruction);
+      BIT *opcode_bits = malloc(6);
+      convert_to_binary(opcode, opcode_bits, 6);
+      for (int i = 0; i < 5; i++)
+      {
+        Instructions[instruction_count][i] = immediate_bits[i];
+      }
+      for (int i = 0; i < 6; i++)
+      {
+        Instructions[instruction_count][i + 26] = opcode_bits[i];
+      }
+    }
+    else if (strcmp(instruction, "jr") == 0)
+    {
+      //handle jr instruction separately
+      //Reg1 - Source 1
+      int reg1 = get_register_number(dest);
+      BIT *reg1_bits = malloc(5);
+      convert_to_binary(reg1, reg1_bits, 5);
+      //Opcode
+      int funct = get_funct(instruction);
+      BIT *funct_bits = malloc(6);
+      convert_to_binary(funct, funct_bits, 6);
+      memset(Instructions[instruction_count], '\0', 32);
+      for (int i = 0; i < 6; i++)
+      {
+        Instructions[instruction_count][i] = funct_bits[i];
+      }
+      for (int i = 0; i < 5; i++)
+      {
+        Instructions[instruction_count][i + 21] = reg1_bits[i];
+      }
+    }
+    else
+    {
+      //R-type instructions
+
+      //Opcode
+      BIT *opcode_bits = malloc(6);
+      memset(opcode_bits, '\0', 6);
+      //Reg3 - rs1
+      int reg3 = get_register_number(src2);
+      BIT *reg3_bits = malloc(5);
+      convert_to_binary(reg3, reg3_bits, 5);
+      //Reg2 - rs2
+      int reg2 = get_register_number(src1);
+      BIT *reg2_bits = malloc(5);
+      convert_to_binary(reg2, reg2_bits, 5);
+      //Reg1 - rd
+      int reg1 = get_register_number(dest);
+      BIT *reg1_bits = malloc(5);
+      convert_to_binary(reg1, reg1_bits, 5);
+      //Shamt - Don't account for sll or srl so always 0
+      BIT *shamt_bits = malloc(5);
+      memset(shamt_bits, '\0', 5);
+      //Funct;
+      int funct = get_funct(instruction);
+      BIT *funct_bits = malloc(6);
+      convert_to_binary(funct, funct_bits, 6);
+      for (int i = 0; i < 6; i++)
+      {
+        Instructions[instruction_count][i] = funct_bits[i];
+      }
+      for (int i = 0; i < 5; i++)
+      {
+        Instructions[instruction_count][i + 6] = shamt_bits[i];
+      }
+      for (int i = 0; i < 5; i++)
+      {
+        Instructions[instruction_count][i + 11] = reg1_bits[i];
+      }
+      for (int i = 0; i < 5; i++)
+      {
+        Instructions[instruction_count][i + 16] = reg3_bits[i];
+      }
+      for (int i = 0; i < 5; i++)
+      {
+        Instructions[instruction_count][i + 21] = reg2_bits[i];
+      }
+      for (int i = 0; i < 6; i++)
+      {
+        Instructions[instruction_count][i + 26] = opcode_bits[i];
+      }
+    }
+    /*DEBUG
+    for (int i = 31; i >= 0; i--)
+    {
+      printf("%d", Instructions[instruction_count][i]);
+    }
+    printf("\n");
+    */
+    instruction_count++;
+  }
   return instruction_count;
 }
 
@@ -389,7 +639,7 @@ int main()
   // parse instructions into binary format
   int counter = get_instructions(MEM_Instruction);
 
-  // load program and run
+  /*// load program and run
   copy_bits(ZERO, PC);
   copy_bits(THIRTY_TWO, MEM_Register[29]);
 
@@ -399,6 +649,6 @@ int main()
     updateState();
     print_state();
   }
-
+*/
   return 0;
 }
