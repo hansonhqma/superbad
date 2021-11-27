@@ -734,28 +734,6 @@ int main()
     updateState();
     print_state();
   }*/
-  /* ALU TESTS
-  BIT* Result = malloc(32);
-  BIT Zero = 0;
-  BIT* A = malloc(32);
-  BIT* B = malloc(32);
-  BIT* ALUControl = malloc(4);
-  memset(ALUControl, 0, 4);
-  BIT* funct = malloc(6);
-  memset(funct, 0, 6);
-  BIT ALUOp[2] = { 1,1 };
-  convert_to_binary(-19, A, 32);
-  convert_to_binary(25, B, 32);
-
-  memset(ALUControl, 0, 4);
-  convert_to_binary(get_funct("slt"), funct, 6);
-  ALU_Control(ALUOp, funct, ALUControl);
-  print_binary(ALUControl);
-  printf("\n\n");
-  ALU(ALUControl, A, B, &Zero, Result);
-  print_binary(Result);
-  printf("\nResult: %d, Zero: %d\n", binary_to_integer(Result), Zero);
-  */
 
   return 0;
 }
