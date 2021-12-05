@@ -46,6 +46,8 @@ BIT nor_gate(BIT A, BIT B);
 BIT nand_gate(BIT A, BIT B);
 
 void decoder2(BIT I0, BIT I1, BIT* O0, BIT* O1, BIT* O2, BIT* O3);
+void decoder3(BIT* I, BIT EN, BIT* O);
+void decoder5(BIT* I, BIT* O);
 BIT multiplexor2(BIT S, BIT I0, BIT I1);
 void multiplexor2_32(BIT S, BIT* I0, BIT* I1, BIT* Output);
 BIT multiplexor4(BIT S0, BIT S1, BIT I0, BIT I1, BIT I2, BIT I3);
@@ -59,9 +61,9 @@ int binary_to_integer(BIT* A);
 int get_instructions(BIT Instructions[][32]);
 
 void Instruction_Memory(BIT* ReadAddress, BIT* Instruction);
-void Control(BIT* OpCode,
-  BIT* RegDst, BIT* Jump, BIT* Branch, BIT* MemRead, BIT* MemToReg,
-  BIT* ALUOp, BIT* MemWrite, BIT* ALUSrc, BIT* RegWrite);
+void Control(BIT* OpCode, BIT funct3,
+  BIT* RegDst0, BIT* RegDst1, BIT* Jump, BIT* Branch, BIT* MemRead, BIT* MemToReg0,
+  BIT* MemToReg1, BIT* ALUOp, BIT* MemWrite, BIT* ALUSrc, BIT* RegWrite, BIT* JumpReg);
 void Read_Register(BIT* ReadRegister1, BIT* ReadRegister2,
   BIT* ReadData1, BIT* ReadData2);
 void Write_Register(BIT RegWrite, BIT* WriteRegister, BIT* WriteData);
@@ -95,6 +97,39 @@ BIT or_gate3(BIT A, BIT B, BIT C)
 {
   return or_gate(A, or_gate(B, C));
 }
+BIT or_gate4(BIT A, BIT B, BIT C, BIT D)
+{
+  return or_gate(or_gate(A, B), or_gate(C, D));
+}
+BIT or_gate5(BIT A, BIT B, BIT C, BIT D, BIT E)
+{
+  //IMPLEMENTED BY: TYLER
+  return or_gate(or_gate(or_gate(A, B), or_gate(C, D)), E);
+}
+BIT or_gate6(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F)
+{
+  //IMPLEMENTED BY: TYLER
+  return or_gate(or_gate(or_gate(A, B), or_gate(C, D)), or_gate(E, F));
+}
+BIT or_gate7(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G)
+{
+  //IMPLEMENTED BY: TYLER
+  return or_gate(or_gate(or_gate(or_gate(A, B), or_gate(C, D)), or_gate(E, F)), G);
+}
+BIT or_gate8(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G, BIT H)
+{
+  return or_gate(or_gate(or_gate(or_gate(A, B), or_gate(C, D)),
+    or_gate(E, F)), or_gate(G, H));
+}
+//IMPLEMENTED BY: TYLER
+BIT or_gate32(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G,
+  BIT H, BIT I, BIT J, BIT K, BIT L, BIT M, BIT N, BIT O, BIT P,
+  BIT Q, BIT R, BIT S, BIT T, BIT U, BIT V, BIT W, BIT X, BIT Y,
+  BIT Z, BIT AA, BIT BB, BIT CC, BIT DD, BIT EE, BIT FF) {
+  return or_gate8(or_gate4(A, B, C, D), or_gate4(E, F, G, H),
+    or_gate4(I, J, K, L), or_gate4(M, N, O, P), or_gate4(Q, R, S, T),
+    or_gate4(U, V, W, X), or_gate4(Y, Z, AA, BB), or_gate4(CC, DD, EE, FF));
+}
 
 BIT and_gate(BIT A, BIT B)
 {
@@ -108,6 +143,10 @@ BIT and_gate3(BIT A, BIT B, BIT C)
 {
   return and_gate(A, and_gate(B, C));
 }
+BIT and_gate4(BIT A, BIT B, BIT C, BIT D)
+{
+  return and_gate(A, and_gate(B, and_gate(C, D)));
+}
 BIT and_gate5(BIT A, BIT B, BIT C, BIT D, BIT E)
 {
   //IMPLEMENTED BY: TYLER
@@ -118,6 +157,26 @@ BIT and_gate6(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F)
   //IMPLEMENTED BY: TYLER
   return and_gate(and_gate(and_gate(A, B), and_gate(C, D)), and_gate(E, F));
 }
+BIT and_gate7(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G)
+{
+  //IMPLEMENTED BY: TYLER
+  return and_gate(and_gate(and_gate(and_gate(A, B), and_gate(C, D)), and_gate(E, F)), G);
+}
+BIT and_gate8(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G, BIT H)
+{
+  return and_gate(and_gate(and_gate(and_gate(A, B), and_gate(C, D)),
+    and_gate(E, F)), and_gate(G, H));
+}
+//IMPLEMENTED BY: TYLER
+BIT and_gate32(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G,
+  BIT H, BIT I, BIT J, BIT K, BIT L, BIT M, BIT N, BIT O, BIT P,
+  BIT Q, BIT R, BIT S, BIT T, BIT U, BIT V, BIT W, BIT X, BIT Y,
+  BIT Z, BIT AA, BIT BB, BIT CC, BIT DD, BIT EE, BIT FF) {
+  return and_gate8(and_gate4(A, B, C, D), and_gate4(E, F, G, H),
+    and_gate4(I, J, K, L), and_gate4(M, N, O, P), and_gate4(Q, R, S, T),
+    and_gate4(U, V, W, X), and_gate4(Y, Z, AA, BB), and_gate4(CC, DD, EE, FF));
+}
+
 
 BIT xor_gate(BIT A, BIT B)
 {
@@ -147,6 +206,40 @@ void decoder2(BIT I0, BIT I1, BIT* O0, BIT* O1, BIT* O2, BIT* O3)
 
   return;
 }
+void decoder3(BIT* I, BIT EN, BIT* O)
+{
+  O[0] = and_gate3(not_gate(I[2]), not_gate(I[1]), not_gate(I[0]));
+  O[1] = and_gate3(not_gate(I[2]), not_gate(I[1]), I[0]);
+  O[2] = and_gate3(not_gate(I[2]), I[1], not_gate(I[0]));
+  O[3] = and_gate3(not_gate(I[2]), I[1], I[0]);
+  O[4] = and_gate3(I[2], not_gate(I[1]), not_gate(I[0]));
+  O[5] = and_gate3(I[2], not_gate(I[1]), I[0]);
+  O[6] = and_gate3(I[2], I[1], not_gate(I[0]));
+  O[7] = and_gate3(I[2], I[1], I[0]);
+
+  O[0] = and_gate(EN, O[0]);
+  O[1] = and_gate(EN, O[1]);
+  O[2] = and_gate(EN, O[2]);
+  O[3] = and_gate(EN, O[3]);
+  O[4] = and_gate(EN, O[4]);
+  O[5] = and_gate(EN, O[5]);
+  O[6] = and_gate(EN, O[6]);
+  O[7] = and_gate(EN, O[7]);
+
+  return;
+}
+
+void decoder5(BIT* I, BIT* O)
+{
+  BIT EN[4] = { FALSE };
+  decoder2(I[3], I[4], &EN[0], &EN[1], &EN[2], &EN[3]);
+  decoder3(I, EN[3], &O[24]);
+  decoder3(I, EN[2], &O[16]);
+  decoder3(I, EN[1], &O[8]);
+  decoder3(I, EN[0], &O[0]);
+}
+
+
 
 BIT multiplexor2(BIT S, BIT I0, BIT I1)
 {
@@ -535,13 +628,6 @@ int get_instructions(BIT Instructions[][32])
         Instructions[instruction_count][i + 26] = opcode_bits[i];
       }
     }
-    /*DEBUG
-    for (int i = 31; i >= 0; i--)
-    {
-      printf("%d", Instructions[instruction_count][i]);
-    }
-    printf("\n");
-    */
     instruction_count++;
   }
   return instruction_count;
@@ -555,18 +641,40 @@ BIT MEM_Instruction[32][32] = { FALSE };
 BIT MEM_Data[32][32] = { FALSE };
 BIT MEM_Register[32][32] = { FALSE };
 
-BIT RegDst = FALSE;
+BIT RegDst0 = FALSE;
+BIT RegDst1 = FALSE;
 BIT Jump = FALSE;
 BIT Branch = FALSE;
 BIT MemRead = FALSE;
-BIT MemToReg = FALSE;
+BIT MemToReg0 = FALSE;
+BIT MemToReg1 = FALSE;
 BIT ALUOp[2] = { FALSE };
 BIT MemWrite = FALSE;
 BIT ALUSrc = FALSE;
 BIT RegWrite = FALSE;
 BIT Zero = FALSE;
+BIT JumpReg = FALSE;
 BIT ALUControl[4] = { FALSE };
 
+void print_control_bits() {
+  printf("RegDst0: %d\n", RegDst0);
+  printf("RegDst1: %d\n", RegDst1);
+  printf("Jump: %d\n", Jump);
+  printf("Branch: %d\n", Branch);
+  printf("MemRead: %d\n", MemRead);
+  printf("MemToReg0: %d\n", MemToReg0);
+  printf("MemToReg1: %d\n", MemToReg1);
+  printf("ALUOp[0]: %d\n", ALUOp[0]);
+  printf("ALUOp[1]: %d\n", ALUOp[1]);
+  printf("MemWrite: %d\n", MemWrite);
+  printf("ALUSrc: %d\n", ALUSrc);
+  printf("RegWrite: %d\n", RegWrite);
+  printf("Zero: %d\n", Zero);
+  printf("ALUControl[0]: %d\n", ALUControl[0]);
+  printf("ALUControl[1]: %d\n", ALUControl[1]);
+  printf("ALUControl[2]: %d\n", ALUControl[2]);
+  printf("ALUControl[3]: %d\n", ALUControl[3]);
+}
 void print_instruction()
 {
   unsigned pc = binary_to_integer(PC);
@@ -602,33 +710,133 @@ void Instruction_Memory(BIT* ReadAddress, BIT* Instruction)
   // Input: 32-bit instruction address
   // Output: 32-bit binary instruction
   // Note: Useful to use a 5-to-32 decoder here
+
 }
 
-void Control(BIT* OpCode,
-  BIT* RegDst, BIT* Jump, BIT* Branch, BIT* MemRead, BIT* MemToReg,
-  BIT* ALUOp, BIT* MemWrite, BIT* ALUSrc, BIT* RegWrite)
+void Control(BIT* OpCode, BIT funct3,
+  BIT* RegDst0, BIT* RegDst1, BIT* Jump, BIT* Branch, BIT* MemRead, BIT* MemToReg0,
+  BIT* MemToReg1, BIT* ALUOp, BIT* MemWrite, BIT* ALUSrc, BIT* RegWrite, BIT* JumpReg)
 {
-  // TODO: Set control bits for everything
-  // Input: opcode field from the instruction
-  // OUtput: all control lines get set
-  // Note: Can use SOP or similar approaches to determine bits
+  /* IMPLEMENTED BY: Tyler
+    -- SOP to determine control bits
+    -- Introduced four new bits:
+      -- JumpReg for jr
+      -- RegDst[1] for jal
+      -- Jump for j
+      -- MemToReg[1] for jal as well
+  */
+  *RegDst1 = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+    not_gate(OpCode[3]), not_gate(OpCode[2]), OpCode[1], OpCode[0]);
+  *RegDst0 = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+    not_gate(OpCode[3]), not_gate(OpCode[2]), not_gate(OpCode[1]),
+    not_gate(OpCode[0]));
+  *ALUSrc = and_gate6(OpCode[5], not_gate(OpCode[4]), not_gate(OpCode[3]),
+    not_gate(OpCode[2]), not_gate(OpCode[1]), OpCode[0]) ||
+    and_gate6(OpCode[5], not_gate(OpCode[4]), OpCode[3],
+      not_gate(OpCode[2]), OpCode[1], OpCode[0]) ||
+    and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]), OpCode[3],
+      not_gate(OpCode[2]), not_gate(OpCode[1]), not_gate(OpCode[0]));
+  *MemToReg1 = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+    not_gate(OpCode[3]), not_gate(OpCode[2]), OpCode[1], OpCode[0]);
+  *MemToReg0 = and_gate6(OpCode[5], not_gate(OpCode[4]),
+    not_gate(OpCode[3]), not_gate(OpCode[2]), not_gate(OpCode[1]), OpCode[0]);
+  *RegWrite = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+    not_gate(OpCode[3]), not_gate(OpCode[2]), not_gate(OpCode[1]),
+    not_gate(OpCode[0])) ||
+    and_gate6(OpCode[5], not_gate(OpCode[4]), not_gate(OpCode[3]),
+      not_gate(OpCode[2]), not_gate(OpCode[1]), OpCode[0]) ||
+    and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+      not_gate(OpCode[3]), not_gate(OpCode[2]), OpCode[1], OpCode[0]) ||
+    and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]), OpCode[3],
+      not_gate(OpCode[2]), not_gate(OpCode[1]), not_gate(OpCode[0]));
+  *MemRead = and_gate6(OpCode[5], not_gate(OpCode[4]), not_gate(OpCode[3]),
+    not_gate(OpCode[2]), not_gate(OpCode[1]), OpCode[0]);
+  *MemWrite = and_gate6(OpCode[5], not_gate(OpCode[4]), OpCode[3],
+    not_gate(OpCode[2]), OpCode[1], OpCode[0]);
+  *Branch = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+    not_gate(OpCode[3]), OpCode[2], not_gate(OpCode[1]),
+    not_gate(OpCode[0]));
+  ALUOp[1] = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+    not_gate(OpCode[3]), not_gate(OpCode[2]), not_gate(OpCode[1]),
+    not_gate(OpCode[0])) || and_gate6(not_gate(OpCode[5]),
+      not_gate(OpCode[4]), OpCode[3], not_gate(OpCode[2]),
+      not_gate(OpCode[1]), not_gate(OpCode[0]));
+  ALUOp[0] = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+    not_gate(OpCode[3]), OpCode[2], not_gate(OpCode[1]),
+    not_gate(OpCode[0])) || and_gate6(not_gate(OpCode[5]),
+      not_gate(OpCode[4]), OpCode[3], not_gate(OpCode[2]),
+      not_gate(OpCode[1]), not_gate(OpCode[0]));
+  *Jump = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+    not_gate(OpCode[3]), not_gate(OpCode[2]), OpCode[1], not_gate(OpCode[0])) ||
+    and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]), not_gate(OpCode[3]),
+      not_gate(OpCode[2]), OpCode[1], OpCode[0]);
+  *JumpReg = and_gate7(funct3, not_gate(OpCode[5]), not_gate(OpCode[4]),
+    not_gate(OpCode[3]), not_gate(OpCode[2]), not_gate(OpCode[1]),
+    not_gate(OpCode[0]));
 }
 
 void Read_Register(BIT* ReadRegister1, BIT* ReadRegister2,
   BIT* ReadData1, BIT* ReadData2)
 {
-  // TODO: Implement register read functionality
+  //IMPLEMENTED BY: VISHAL & TYLER
   // Input: two 5-bit register addresses
   // Output: the values of the specified registers in ReadData1 and ReadData2
-  // Note: Implementation will be very similar to instruction memory circuit
+  BIT* O1 = malloc(32);
+  BIT* O2 = malloc(32);
+  decoder5(ReadRegister1, O1);
+  decoder5(ReadRegister2, O2);
+  for (int i = 0;i < 32;i++) {
+    ReadData1[i] = or_gate32(and_gate(O1[0], MEM_Register[0][i]), and_gate(O1[1], MEM_Register[1][i]),
+      and_gate(O1[2], MEM_Register[2][i]), and_gate(O1[3], MEM_Register[3][i]),
+      and_gate(O1[4], MEM_Register[4][i]), and_gate(O1[5], MEM_Register[5][i]),
+      and_gate(O1[6], MEM_Register[6][i]), and_gate(O1[7], MEM_Register[7][i]),
+      and_gate(O1[8], MEM_Register[8][i]), and_gate(O1[9], MEM_Register[9][i]),
+      and_gate(O1[10], MEM_Register[10][i]), and_gate(O1[11], MEM_Register[11][i]),
+      and_gate(O1[12], MEM_Register[12][i]), and_gate(O1[13], MEM_Register[13][i]),
+      and_gate(O1[14], MEM_Register[14][i]), and_gate(O1[15], MEM_Register[15][i]),
+      and_gate(O1[16], MEM_Register[16][i]), and_gate(O1[17], MEM_Register[17][i]),
+      and_gate(O1[18], MEM_Register[18][i]), and_gate(O1[19], MEM_Register[19][i]),
+      and_gate(O1[20], MEM_Register[20][i]), and_gate(O1[21], MEM_Register[21][i]),
+      and_gate(O1[22], MEM_Register[22][i]), and_gate(O1[23], MEM_Register[23][i]),
+      and_gate(O1[24], MEM_Register[24][i]), and_gate(O1[25], MEM_Register[25][i]),
+      and_gate(O1[26], MEM_Register[26][i]), and_gate(O1[27], MEM_Register[27][i]),
+      and_gate(O1[28], MEM_Register[28][i]), and_gate(O1[29], MEM_Register[29][i]),
+      and_gate(O1[30], MEM_Register[30][i]), and_gate(O1[31], MEM_Register[31][i]));
+  };
+  for (int i = 0;i < 32;i++) {
+    ReadData2[i] = or_gate32(and_gate(O2[0], MEM_Register[0][i]), and_gate(O2[1], MEM_Register[1][i]),
+      and_gate(O2[2], MEM_Register[2][i]), and_gate(O2[3], MEM_Register[3][i]),
+      and_gate(O2[4], MEM_Register[4][i]), and_gate(O2[5], MEM_Register[5][i]),
+      and_gate(O2[6], MEM_Register[6][i]), and_gate(O2[7], MEM_Register[7][i]),
+      and_gate(O2[8], MEM_Register[8][i]), and_gate(O2[9], MEM_Register[9][i]),
+      and_gate(O2[10], MEM_Register[10][i]), and_gate(O2[11], MEM_Register[11][i]),
+      and_gate(O2[12], MEM_Register[12][i]), and_gate(O2[13], MEM_Register[13][i]),
+      and_gate(O2[14], MEM_Register[14][i]), and_gate(O2[15], MEM_Register[15][i]),
+      and_gate(O2[16], MEM_Register[16][i]), and_gate(O2[17], MEM_Register[17][i]),
+      and_gate(O2[18], MEM_Register[18][i]), and_gate(O2[19], MEM_Register[19][i]),
+      and_gate(O2[20], MEM_Register[20][i]), and_gate(O2[21], MEM_Register[21][i]),
+      and_gate(O2[22], MEM_Register[22][i]), and_gate(O2[23], MEM_Register[23][i]),
+      and_gate(O2[24], MEM_Register[24][i]), and_gate(O2[25], MEM_Register[25][i]),
+      and_gate(O2[26], MEM_Register[26][i]), and_gate(O2[27], MEM_Register[27][i]),
+      and_gate(O2[28], MEM_Register[28][i]), and_gate(O2[29], MEM_Register[29][i]),
+      and_gate(O2[30], MEM_Register[30][i]), and_gate(O2[31], MEM_Register[31][i]));
+  };
 }
 
 void Write_Register(BIT RegWrite, BIT* WriteRegister, BIT* WriteData)
 {
-  // TODO: Implement register write functionality
+  // IMPLEMENTED BY: TYLER
   // Input: one 5-bit register address, data to write, and control bit
   // Output: None, but will modify register file
-  // Note: Implementation will again be similar to those above
+  BIT* O = malloc(32);
+  decoder5(WriteRegister, O);
+  for (int i = 0;i < 32;i++) {
+    for (int j = 0;j < 32;j++) {
+      MEM_Register[i][j] = multiplexor2(RegWrite, MEM_Register[i][j],
+        multiplexor2(O[i], MEM_Register[i][j], WriteData[j]));
+    }
+  };
+
 }
 
 void ALU_Control(BIT* ALUOp, BIT* funct, BIT* ALUControl)
@@ -640,16 +848,18 @@ void ALU_Control(BIT* ALUOp, BIT* funct, BIT* ALUControl)
      binary instruction
   - Output:4-bit ALUControl for input into the ALU
   - Note: SOP used to set ALUControl bits
+  -- TODO: Account for addi instruction here (which has ALUOp = 11 = 3)
   */
-  ALUControl[2] = ALUOp[0]
-    || and_gate5(ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), not_gate(funct[3]))
-    || and_gate5(ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), funct[3]);
+  ALUControl[2] = and_gate(ALUOp[0], not_gate(ALUOp[1]))
+    || and_gate6(not_gate(ALUOp[0]), ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), not_gate(funct[3]))
+    || and_gate6(not_gate(ALUOp[0]), ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), funct[3]);
   ALUControl[1] = and_gate(not_gate(ALUOp[0]), not_gate(ALUOp[1])) || ALUOp[0]
-    || and_gate5(ALUOp[1], not_gate(funct[0]), not_gate(funct[1]), not_gate(funct[2]), not_gate(funct[3]))
-    || and_gate5(ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), not_gate(funct[3]))
-    || and_gate5(ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), funct[3]);
-  ALUControl[0] = and_gate5(ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), funct[3])
-    || and_gate5(ALUOp[1], funct[0], not_gate(funct[1]), funct[2], not_gate(funct[3]));
+    || and_gate6(not_gate(ALUOp[0]), ALUOp[1], not_gate(funct[0]), not_gate(funct[1]), not_gate(funct[2]), not_gate(funct[3]))
+    || and_gate6(not_gate(ALUOp[0]), ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), not_gate(funct[3]))
+    || and_gate6(not_gate(ALUOp[0]), ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), funct[3])
+    || and_gate(ALUOp[0], ALUOp[1]);
+  ALUControl[0] = and_gate6(not_gate(ALUOp[0]), ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), funct[3])
+    || and_gate6(not_gate(ALUOp[0]), ALUOp[1], funct[0], not_gate(funct[1]), funct[2], not_gate(funct[3]));
 }
 
 void ALU(BIT* ALUControl, BIT* Input1, BIT* Input2, BIT* Zero, BIT* Result)
@@ -694,12 +904,21 @@ void Data_Memory(BIT MemWrite, BIT MemRead,
 
 void Extend_Sign16(BIT* Input, BIT* Output)
 {
-  // TODO: Implement 16-bit to 32-bit sign extender
-  // Copy Input to Output, then extend 16th Input bit to 17-32 bits in Output
+  /*
+  IMPLEMENTED BY: TYLER
+  -- Fill higher 16 bits with MSB of input
+  */
+  for (int i = 0;i < 16;i++) {
+    Output[i] = Input[i];
+  }
+  for (int i = 16;i < 32;i++) {
+    Output[i] = Input[15];
+  }
 }
 
 void updateState()
 {
+  unsigned pc = binary_to_integer(PC);
   // TODO: Implement the full datapath here
   // Essentially, you'll be figuring out the order in which to process each of
   // the sub-circuits comprising the entire processor circuit. It makes it
@@ -711,6 +930,14 @@ void updateState()
   // Memory - read/write data memory
   // Write Back - write to the register file
   // Update PC - determine the final PC value for the next instruction
+  BIT* newPC = malloc(32);
+  BIT ALUControl[4] = { 0,1,0,0 };
+  BIT* one = malloc(32);
+  convert_to_binary(1, one, 32);
+  ALU(ALUControl, PC, one, &Zero, newPC);
+  copy_bits(newPC, PC);
+  free(newPC);
+
 }
 
 /******************************************************************************/
@@ -720,20 +947,17 @@ void updateState()
 int main()
 {
   setbuf(stdout, NULL);
-
+  //Read register test
   // parse instructions into binary format
   int counter = get_instructions(MEM_Instruction);
-
   // load program and run
   copy_bits(ZERO, PC);
   copy_bits(THIRTY_TWO, MEM_Register[29]);
-  /*
   while (binary_to_integer(PC) < counter)
   {
     print_instruction();
     updateState();
     print_state();
-  }*/
-
+  }
   return 0;
 }
