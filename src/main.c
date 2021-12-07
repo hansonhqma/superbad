@@ -896,10 +896,44 @@ void ALU(BIT* ALUControl, BIT* Input1, BIT* Input2, BIT* Zero, BIT* Result)
 void Data_Memory(BIT MemWrite, BIT MemRead,
   BIT* Address, BIT* WriteData, BIT* ReadData)
 {
+  // Implimented by: Rachel Lacobelle
+
   // TODO: Implement data memory
   // Input: 32-bit address, control flags for read/write, and data to write
   // Output: data read if processing a lw instruction
   // Note: Implementation similar as above
+
+  // use Address and WriteData to find Read Data
+
+  BIT lw_instr = or_gate(MemWrite,MemRead); // will be 1 if it is lw instruction
+
+  // should find the two 5 bit sections to use
+  
+  
+  int count = 0;
+  for (int i = 25; i < 21; i--) {
+    ReadRegister1[count] = Address[i];
+    count += 1;
+  }
+
+  count = 0;
+  for (int i = 20; i < 16; i--) {
+    ReadRegister2[count] = Address[i];
+    count += 1;
+  }
+
+  Read_Register(ReadRegister1, ReadRegister2, ReadData1, ReadData2);
+
+  for (int i = 0; i < 32; i++) {
+    ReadData[i] = WriteData[i];
+  }
+  
+
+  // Read_Register(BIT* ReadRegister1, BIT* ReadRegister2, BIT* ReadData1, BIT* ReadData2
+
+
+  // data should only be changed from all 0 if lw instruction (sw can change it as well)
+  // output is ReadData
 }
 
 void Extend_Sign16(BIT* Input, BIT* Output)
