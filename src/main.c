@@ -964,7 +964,8 @@ void Extend_Sign16(BIT* Input, BIT* Output)
 
 void updateState()
 {
-  // TODO: Implement the full datapath here
+  //PARTIAL IMPLEMENTATION BY: TYLER
+
   // Essentially, you'll be figuring out the order in which to process each of
   // the sub-circuits comprising the entire processor circuit. It makes it
   // easier to consider the pipelined version of the process, and handle things
@@ -1034,7 +1035,19 @@ void updateState()
   BIT ALUControlPC[4] = { 0,1,0,0 };
   ALU(ALUControlPC, PC, ONE, &Zero, newPC);
   copy_bits(newPC, PC);
+  //FREES
   free(newPC);
+  free(ALUControl);
+  free(ImmediateExtended);
+  free(ReadData1);
+  free(ReadData2);
+  free(WriteRegister);
+  free(src1);
+  free(src2);
+  free(Result);
+  free(ReadData);
+  free(WriteData);
+
   //TODO: Branching and jumping
 
 }
