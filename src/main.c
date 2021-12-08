@@ -1065,7 +1065,7 @@ void updateState()
   BIT rs2[5] = { Instruction[16], Instruction[17], Instruction[18], Instruction[19], Instruction[20] };
   BIT rd[5] = { Instruction[11], Instruction[12], Instruction[13], Instruction[14], Instruction[15] };
   //BIT shamt[5] = { Instruction[6], Instruction[7], Instruction[8], Instruction[9], Instruction[10] };
-  BIT funct[5] = { Instruction[0], Instruction[1], Instruction[2], Instruction[3], Instruction[4] };
+  BIT funct[6] = { Instruction[0], Instruction[1], Instruction[2], Instruction[3], Instruction[4], Instruction[5] };
   //I-type
   BIT Immediate[16] = { Instruction[0], Instruction[1], Instruction[2], Instruction[3], Instruction[4],
       Instruction[5], Instruction[6], Instruction[7], Instruction[8], Instruction[9], Instruction[10],
@@ -1128,7 +1128,7 @@ void updateState()
   BIT shouldBranch = and_gate(Zero, Branch);
   multiplexor2_32(shouldBranch, newPC, BranchAddress, BaseAddress);
   multiplexor2_32(Jump, BaseAddress, JumpAddress, PC);
-  //TODO: jr implementation
+  // Jump back to address in ReadData1 if JumpReg = 1
   multiplexor2_32(JumpReg, PC, ReadData1, PC);
   //FREES
   free(newPC);
