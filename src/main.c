@@ -1,11 +1,11 @@
 /*
 Class Project: The logical conclusion (v1.1)
 CSCI-2500 Fall 2021
+This program simulates a full datapath, imitating
+the progression of instructions through the 5
+stages of what is a single-cycle architecture here.
 */
 
-/******************************************************************************/
-/* Usual suspects to include  */
-/******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,7 +55,6 @@ BIT multiplexor4(BIT S0, BIT S1, BIT I0, BIT I1, BIT I2, BIT I3);
 void copy_bits(BIT* A, BIT* B);
 void print_binary(BIT* A);
 void convert_to_binary(int a, BIT* A, int length);
-void convert_to_binary_char(int a, char* A, int length);
 int binary_to_integer(BIT* A);
 
 int get_instructions(BIT Instructions[][32]);
@@ -72,7 +71,6 @@ void ALU(BIT* ALUControl, BIT* Input1, BIT* Input2, BIT* Zero, BIT* Result);
 void Data_Memory(BIT MemWrite, BIT MemRead,
   BIT* Address, BIT* WriteData, BIT* ReadData);
 void Extend_Sign16(BIT* Input, BIT* Output);
-void shiftBy2(BIT* Input, BIT* Output, BIT right);
 void updateState();
 
 /******************************************************************************/
@@ -93,28 +91,25 @@ BIT or_gate(BIT A, BIT B)
   else
     return FALSE;
 }
-
 BIT or_gate3(BIT A, BIT B, BIT C)
 {
   return or_gate(A, or_gate(B, C));
 }
+// Extended OR Gates
 BIT or_gate4(BIT A, BIT B, BIT C, BIT D)
 {
   return or_gate(or_gate(A, B), or_gate(C, D));
 }
 BIT or_gate5(BIT A, BIT B, BIT C, BIT D, BIT E)
 {
-  //IMPLEMENTED BY: TYLER
   return or_gate(or_gate(or_gate(A, B), or_gate(C, D)), E);
 }
 BIT or_gate6(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F)
 {
-  //IMPLEMENTED BY: TYLER
   return or_gate(or_gate(or_gate(A, B), or_gate(C, D)), or_gate(E, F));
 }
 BIT or_gate7(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G)
 {
-  //IMPLEMENTED BY: TYLER
   return or_gate(or_gate(or_gate(or_gate(A, B), or_gate(C, D)), or_gate(E, F)), G);
 }
 BIT or_gate8(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G, BIT H)
@@ -122,7 +117,6 @@ BIT or_gate8(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G, BIT H)
   return or_gate(or_gate(or_gate(or_gate(A, B), or_gate(C, D)),
     or_gate(E, F)), or_gate(G, H));
 }
-//IMPLEMENTED BY: TYLER
 BIT or_gate32(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G,
   BIT H, BIT I, BIT J, BIT K, BIT L, BIT M, BIT N, BIT O, BIT P,
   BIT Q, BIT R, BIT S, BIT T, BIT U, BIT V, BIT W, BIT X, BIT Y,
@@ -144,23 +138,21 @@ BIT and_gate3(BIT A, BIT B, BIT C)
 {
   return and_gate(A, and_gate(B, C));
 }
+// Extended AND gates
 BIT and_gate4(BIT A, BIT B, BIT C, BIT D)
 {
   return and_gate(A, and_gate(B, and_gate(C, D)));
 }
 BIT and_gate5(BIT A, BIT B, BIT C, BIT D, BIT E)
 {
-  //IMPLEMENTED BY: TYLER
   return and_gate(and_gate(and_gate(A, B), and_gate(C, D)), E);
 }
 BIT and_gate6(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F)
 {
-  //IMPLEMENTED BY: TYLER
   return and_gate(and_gate(and_gate(A, B), and_gate(C, D)), and_gate(E, F));
 }
 BIT and_gate7(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G)
 {
-  //IMPLEMENTED BY: TYLER
   return and_gate(and_gate(and_gate(and_gate(A, B), and_gate(C, D)), and_gate(E, F)), G);
 }
 BIT and_gate8(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G, BIT H)
@@ -172,7 +164,6 @@ BIT and_gate12(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G, BIT H, BIT I, BI
 {
   return and_gate(and_gate6(A, B, C, D, E, F), and_gate6(G, H, I, J, K, L));
 }
-//IMPLEMENTED BY: TYLER
 BIT and_gate32(BIT A, BIT B, BIT C, BIT D, BIT E, BIT F, BIT G,
   BIT H, BIT I, BIT J, BIT K, BIT L, BIT M, BIT N, BIT O, BIT P,
   BIT Q, BIT R, BIT S, BIT T, BIT U, BIT V, BIT W, BIT X, BIT Y,
@@ -203,7 +194,7 @@ BIT nand_gate(BIT A, BIT B)
 
 void decoder2(BIT I0, BIT I1, BIT* O0, BIT* O1, BIT* O2, BIT* O3)
 {
-  // Note: The input -> output mapping is slightly modified from before
+  // 2-input decoder implmented in labs 5 & 6
   *O0 = and_gate(not_gate(I1), not_gate(I0));
   *O1 = and_gate(not_gate(I1), I0);
   *O2 = and_gate(I1, not_gate(I0));
@@ -213,6 +204,7 @@ void decoder2(BIT I0, BIT I1, BIT* O0, BIT* O1, BIT* O2, BIT* O3)
 }
 void decoder3(BIT* I, BIT EN, BIT* O)
 {
+  // 3-input decoder implmented in labs 5 & 6
   O[0] = and_gate3(not_gate(I[2]), not_gate(I[1]), not_gate(I[0]));
   O[1] = and_gate3(not_gate(I[2]), not_gate(I[1]), I[0]);
   O[2] = and_gate3(not_gate(I[2]), I[1], not_gate(I[0]));
@@ -236,6 +228,12 @@ void decoder3(BIT* I, BIT EN, BIT* O)
 
 void decoder5(BIT* I, BIT* O)
 {
+  /*
+    -- 5-input decoder implmented in labs 5 & 6
+    -- Note the use of a 2-decoder to set enabler bits
+    -- 3-decoders used to set output bits in 8-step increments
+  */
+
   BIT EN[4] = { FALSE };
   decoder2(I[3], I[4], &EN[0], &EN[1], &EN[2], &EN[3]);
   decoder3(I, EN[3], &O[24]);
@@ -248,6 +246,7 @@ void decoder5(BIT* I, BIT* O)
 
 BIT multiplexor2(BIT S, BIT I0, BIT I1)
 {
+  // 1-input multiplexor implmented in labs 5 & 6
   BIT x0 = and_gate(not_gate(S), I0);
   BIT x1 = and_gate(S, I1);
   return or_gate(x0, x1);
@@ -255,6 +254,7 @@ BIT multiplexor2(BIT S, BIT I0, BIT I1)
 
 void multiplexor2_32(BIT S, BIT* I0, BIT* I1, BIT* Output)
 {
+  // 1-input multiplexor utility on all 32 bits of two inputs
   for (int i = 0; i < 32; ++i)
   {
     BIT x0 = and_gate(not_gate(S), I0[i]);
@@ -265,6 +265,7 @@ void multiplexor2_32(BIT S, BIT* I0, BIT* I1, BIT* Output)
 
 BIT multiplexor4(BIT S0, BIT S1, BIT I0, BIT I1, BIT I2, BIT I3)
 {
+  // 2-input multiplexor implmented in labs 5 & 6
   BIT x0, x1, x2, x3 = FALSE;
   decoder2(S0, S1, &x0, &x1, &x2, &x3);
 
@@ -280,10 +281,7 @@ BIT multiplexor4(BIT S0, BIT S1, BIT I0, BIT I1, BIT I2, BIT I3)
 }
 void adder1(BIT A, BIT B, BIT CarryIn, BIT* CarryOut, BIT* Sum)
 {
-  //IMPLEMENTED BY: TYLER
-  // TODO: implement a 1-bit adder
-  // Note: you can probably copy+paste this from your (or my) Lab 5 solution
-
+  // 1-bit adder implmented in lab 5
   BIT x0 = xor_gate(A, B);
   *Sum = xor_gate(CarryIn, x0);
 
@@ -295,10 +293,7 @@ void adder1(BIT A, BIT B, BIT CarryIn, BIT* CarryOut, BIT* Sum)
 void ALU1(BIT A, BIT B, BIT Binvert, BIT CarryIn, BIT Less,
   BIT Op0, BIT Op1, BIT* Result, BIT* CarryOut, BIT* Set)
 {
-  //IMPLEMENTED BY: TYLER
-  // TODO: implement a 1-bit ALU
-  // Note: this will need modifications from Lab 5 to account for 'slt'
-  // See slide "MSB ALU" in csci2500-f21-ch03a-slides.pdf
+  // 1-bit ALU as implemented in lab 6
   BIT x0 = multiplexor2(Binvert, B, not_gate(B));
 
   BIT y0 = and_gate(A, x0);
@@ -330,27 +325,24 @@ void print_binary(BIT* A)
 
 void convert_to_binary(int a, BIT* A, int length)
 {
-  //IMPLEMENTED BY: TYLER
+  // Utility to convert offset values provided in instruction 
   memset(A, '\0', length);
+  // Set all bits to 0
   for (int i = 0; i < length; i++)
   {
+    // Set A[i] to LSB in the input
     A[i] = a & 1;
-    a = a >> 1;
-  }
-}
-
-void convert_to_binary_char(int a, char* A, int length)
-{
-  //IMPLEMENTED BY: TYLER
-  for (int i = 0; i < length; i++)
-  {
-    A[i] = a & 1;
+    // Shift input right by 1
     a = a >> 1;
   }
 }
 
 int binary_to_integer(BIT* A)
 {
+  /*
+     -- Debugging utility to convert binary
+        array to an integer value
+  */
   unsigned a = 0;
   unsigned mult = 1;
 
@@ -362,45 +354,6 @@ int binary_to_integer(BIT* A)
 
   return (int)a;
 }
-void shiftBy2(BIT* Input, BIT* Output, BIT right) {
-  /*
-   -- Shift by 2 bits, shift right right if
-    'right' == 1, else left
-   -- IMPLEMENTED BY: TYLER
-  */
-  Output[0] = multiplexor2(right, 0, Input[2]);
-  Output[1] = multiplexor2(right, 0, Input[3]);
-  Output[2] = multiplexor2(right, Input[0], Input[4]);
-  Output[3] = multiplexor2(right, Input[1], Input[5]);
-  Output[4] = multiplexor2(right, Input[2], Input[6]);
-  Output[5] = multiplexor2(right, Input[3], Input[7]);
-  Output[6] = multiplexor2(right, Input[4], Input[8]);
-  Output[7] = multiplexor2(right, Input[5], Input[9]);
-  Output[8] = multiplexor2(right, Input[6], Input[10]);
-  Output[9] = multiplexor2(right, Input[7], Input[11]);
-  Output[10] = multiplexor2(right, Input[8], Input[12]);
-  Output[11] = multiplexor2(right, Input[9], Input[13]);
-  Output[12] = multiplexor2(right, Input[10], Input[14]);
-  Output[13] = multiplexor2(right, Input[11], Input[15]);
-  Output[14] = multiplexor2(right, Input[12], Input[16]);
-  Output[15] = multiplexor2(right, Input[13], Input[17]);
-  Output[16] = multiplexor2(right, Input[14], Input[18]);
-  Output[17] = multiplexor2(right, Input[15], Input[19]);
-  Output[18] = multiplexor2(right, Input[16], Input[20]);
-  Output[19] = multiplexor2(right, Input[17], Input[21]);
-  Output[20] = multiplexor2(right, Input[18], Input[22]);
-  Output[21] = multiplexor2(right, Input[19], Input[23]);
-  Output[22] = multiplexor2(right, Input[20], Input[24]);
-  Output[23] = multiplexor2(right, Input[21], Input[25]);
-  Output[24] = multiplexor2(right, Input[22], Input[26]);
-  Output[25] = multiplexor2(right, Input[23], Input[27]);
-  Output[26] = multiplexor2(right, Input[24], Input[28]);
-  Output[27] = multiplexor2(right, Input[25], Input[29]);
-  Output[28] = multiplexor2(right, Input[26], Input[30]);
-  Output[29] = multiplexor2(right, Input[27], Input[31]);
-  Output[30] = multiplexor2(right, Input[28], 0);
-  Output[31] = multiplexor2(right, Input[29], 0);
-}
 
 /******************************************************************************/
 /* Parsing functions */
@@ -409,7 +362,9 @@ void shiftBy2(BIT* Input, BIT* Output, BIT right) {
 // TODO: Implement any helper functions to assist with parsing
 int get_opcode(char* instruction)
 {
-  //IMPLEMENTED BY: TYLER
+  /* This function retrives the integer opcode from the
+     instruction string using string comparisons.
+  */
   if (strcmp(instruction, "lw") == 0)
   {
     return 35;
@@ -435,14 +390,21 @@ int get_opcode(char* instruction)
     return 3;
   }
   {
-    //R-type instructions and jr
+    /*
+      -- R-type instructions and jr have opcode = 0
+         with specific funct values.
+    */
+
     return 0;
   }
 }
 int get_register_number(char* reg)
-/*Returns the register number associated with the formatted register*/
 {
-  //IMPLEMENTED BY: TYLER
+  /* This function retrieves the register number associated
+     with a register name using string comparisons. Note
+     that we only account for those registers enumerated
+     below.
+  */
   if (strcmp(reg, "zero") == 0)
   {
     return 0;
@@ -485,6 +447,7 @@ int get_register_number(char* reg)
   }
   else
   {
+    // Undefined register
     return -1;
   }
 }
@@ -523,12 +486,21 @@ int get_funct(char* instruction)
 
 int get_instructions(BIT Instructions[][32])
 {
-  //IMPLEMENTED BY: TYLER
+  /* This function reads assembly language in MIPS
+     from stdin and converts that instruction to a
+     binary format for later fetching.
+  */
+  //READ INSTRUCTIONS FROM STDIN
   char line[256] = { 0 };
   int instruction_count = 0;
   while (fgets(line, 256, stdin) != NULL)
   {
     //Initialize string components of instruction
+    /*
+      -- Note that we assume a consistent format to the
+         instruction here.
+    */
+
     char instruction[16];
     char dest[16];
     char src1[16];
@@ -540,47 +512,59 @@ int get_instructions(BIT Instructions[][32])
     //Read components of instruction
     sscanf(line, "%s %s %s %s", instruction, dest, src1, src2);
     //Determine behavior of instruction
+    //Convert each component to binary format
     if (strcmp(instruction, "lw") == 0 || strcmp(instruction, "sw") == 0 ||
       strcmp(instruction, "addi") == 0)
     {
-      //I-type instructions
+      // I-type instructions
 
-      //Immediate
+      // Immediate - Assume an integer value here
       char* END = NULL;
+      // Convert string to integer
       int immediate = strtol(src2, &END, 10);
       BIT* immediate_bits = malloc(16);
       convert_to_binary(immediate, immediate_bits, 16);
-      //Reg2 - source 1
+      // Reg2 - source 1 (assume a register name here)
+      // Get register number
       int reg2 = get_register_number(src1);
       BIT* reg2_bits = malloc(5);
+      //Convert to binary
       convert_to_binary(reg2, reg2_bits, 5);
-      //Reg1 - Destination
+      // Reg1 - Destination (assume a register name here)
       int reg1 = get_register_number(dest);
       BIT* reg1_bits = malloc(5);
       convert_to_binary(reg1, reg1_bits, 5);
-      //Opcode
+      // Opcode from instruction name
       int opcode = get_opcode(instruction);
       BIT* opcode_bits = malloc(6);
       convert_to_binary(opcode, opcode_bits, 6);
+      /*
+        -- Set instruction bits directly in instruction memory
+        -- Assign address correlating to line number effectively
+      */
+      // Immediate
       for (int i = 0; i < 16; i++)
       {
         Instructions[instruction_count][i] = immediate_bits[i];
       }
+      // Destination register
       for (int i = 0; i < 5; i++)
       {
         Instructions[instruction_count][i + 16] = reg1_bits[i];
       }
+      // Source register
       for (int i = 0; i < 5; i++)
       {
         Instructions[instruction_count][i + 21] = reg2_bits[i];
       }
+      // Opcode
       for (int i = 0; i < 6; i++)
       {
         Instructions[instruction_count][i + 26] = opcode_bits[i];
       }
     }
     else if (strcmp(instruction, "beq") == 0) {
-      //Immediate
+      // Special behavior for beq
       char* END = NULL;
       int immediate = strtol(src2, &END, 10);
       BIT* immediate_bits = malloc(16);
@@ -597,18 +581,23 @@ int get_instructions(BIT Instructions[][32])
       int opcode = get_opcode(instruction);
       BIT* opcode_bits = malloc(6);
       convert_to_binary(opcode, opcode_bits, 6);
+      // Set bits in instruction memory
+      //Immediate branch offset
       for (int i = 0; i < 16; i++)
       {
         Instructions[instruction_count][i] = immediate_bits[i];
       }
+      //Second source register
       for (int i = 0; i < 5; i++)
       {
         Instructions[instruction_count][i + 16] = reg2_bits[i];
       }
+      // First source register
       for (int i = 0; i < 5; i++)
       {
         Instructions[instruction_count][i + 21] = reg1_bits[i];
       }
+      // Opcode
       for (int i = 0; i < 6; i++)
       {
         Instructions[instruction_count][i + 26] = opcode_bits[i];
@@ -617,19 +606,22 @@ int get_instructions(BIT Instructions[][32])
     else if (strcmp(instruction, "j") == 0 || strcmp(instruction, "jal") == 0)
     {
       //J-type instructions
-      //Immediate
+      // Immediate
       char* END = NULL;
       int immediate = strtol(dest, &END, 10);
+      // 26-bits for the immediate value
       BIT* immediate_bits = malloc(26);
       convert_to_binary(immediate, immediate_bits, 26);
       //Opcode
       int opcode = get_opcode(instruction);
       BIT* opcode_bits = malloc(6);
       convert_to_binary(opcode, opcode_bits, 6);
+      // Immediate jump address
       for (int i = 0; i < 26; i++)
       {
         Instructions[instruction_count][i] = immediate_bits[i];
       }
+      // Opcode
       for (int i = 0; i < 6; i++)
       {
         Instructions[instruction_count][i + 26] = opcode_bits[i];
@@ -637,7 +629,7 @@ int get_instructions(BIT Instructions[][32])
     }
     else if (strcmp(instruction, "jr") == 0)
     {
-      //handle jr instruction separately
+      //Handle jr instruction separately
       //Reg1 - Source 1
       int reg1 = get_register_number(dest);
       BIT* reg1_bits = malloc(5);
@@ -647,10 +639,12 @@ int get_instructions(BIT Instructions[][32])
       BIT* funct_bits = malloc(6);
       convert_to_binary(funct, funct_bits, 6);
       memset(Instructions[instruction_count], '\0', 32);
+      // Funct bits
       for (int i = 0; i < 6; i++)
       {
         Instructions[instruction_count][i] = funct_bits[i];
       }
+      // Register that contains the address to which we are returning
       for (int i = 0; i < 5; i++)
       {
         Instructions[instruction_count][i + 21] = reg1_bits[i];
@@ -682,22 +676,27 @@ int get_instructions(BIT Instructions[][32])
       int funct = get_funct(instruction);
       BIT* funct_bits = malloc(6);
       convert_to_binary(funct, funct_bits, 6);
+      // Funct
       for (int i = 0; i < 6; i++)
       {
         Instructions[instruction_count][i] = funct_bits[i];
       }
+      // Shamt - unused 
       for (int i = 0; i < 5; i++)
       {
         Instructions[instruction_count][i + 6] = shamt_bits[i];
       }
+      // Destination register
       for (int i = 0; i < 5; i++)
       {
         Instructions[instruction_count][i + 11] = reg1_bits[i];
       }
+      // Source register 1
       for (int i = 0; i < 5; i++)
       {
         Instructions[instruction_count][i + 16] = reg3_bits[i];
       }
+      // Source Register 2
       for (int i = 0; i < 5; i++)
       {
         Instructions[instruction_count][i + 21] = reg2_bits[i];
@@ -785,13 +784,17 @@ void print_state()
 /******************************************************************************/
 void Instruction_Memory(BIT* ReadAddress, BIT* Instruction)
 {
-  // IMPLEMENTED BY: HANSON
-  // Input: 32-bit instruction address
-  // Output: 32-bit binary instruction
-  // Note: Useful to use a 5-to-32 decoder here
+  /* This function retrieves the instruction at the given
+     address in a binary format. */
+     // Input: 32-bit instruction address
+     // Output: 32-bit binary instruction
   BIT* O = malloc(32);
+  // Use 5-decoder to identify address we want
   decoder5(ReadAddress, O);
+  // From all 32 register in I-mem, only choose the bits from the address we want
   for (int i = 0;i < 32;i++) {
+    /* Note that this will evaluate to one only if there is a one
+      at the i^th bit of the instruction stored at the given address. */
     Instruction[i] = or_gate32(and_gate(O[0], MEM_Instruction[0][i]), and_gate(O[1], MEM_Instruction[1][i]),
       and_gate(O[2], MEM_Instruction[2][i]), and_gate(O[3], MEM_Instruction[3][i]),
       and_gate(O[4], MEM_Instruction[4][i]), and_gate(O[5], MEM_Instruction[5][i]),
@@ -816,15 +819,17 @@ void Control(BIT* OpCode, BIT* funct,
   BIT* RegDst0, BIT* RegDst1, BIT* Jump, BIT* Branch, BIT* MemRead, BIT* MemToReg0,
   BIT* MemToReg1, BIT* ALUOp, BIT* MemWrite, BIT* ALUSrc, BIT* RegWrite, BIT* JumpReg)
 {
-  /* IMPLEMENTED BY: Tyler
+  /* This function sets all control bits in the simulated datapath.*/
+  /*
     -- SOP to determine control bits
     -- Introduced four new bits:
       -- JumpReg for jr
       -- RegDst[1] for jal
       -- Jump for j
       -- MemToReg[1] for jal as well
+      -- See table in writeup for development of SOP's
   */
-  *RegDst1 = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
+  * RegDst1 = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
     not_gate(OpCode[3]), not_gate(OpCode[2]), OpCode[1], OpCode[0]);
   *RegDst0 = and_gate6(not_gate(OpCode[5]), not_gate(OpCode[4]),
     not_gate(OpCode[3]), not_gate(OpCode[2]), not_gate(OpCode[1]),
@@ -878,14 +883,20 @@ void Control(BIT* OpCode, BIT* funct,
 void Read_Register(BIT* ReadRegister1, BIT* ReadRegister2,
   BIT* ReadData1, BIT* ReadData2)
 {
-  //IMPLEMENTED BY: VISHAL & TYLER
+  /*
+  This function retrives the data from the two 5-bit
+  inputs passed and stores that data in ReadData1 and
+  ReadData2, respectively.
+  */
   // Input: two 5-bit register addresses
   // Output: the values of the specified registers in ReadData1 and ReadData2
   BIT* O1 = malloc(32);
   BIT* O2 = malloc(32);
+  // Similar use of decoder as seen in instruction memory
   decoder5(ReadRegister1, O1);
   decoder5(ReadRegister2, O2);
   for (int i = 0;i < 32;i++) {
+    // Take i^th bit of value stored at the register denoted by ReadRegister1
     ReadData1[i] = or_gate32(and_gate(O1[0], MEM_Register[0][i]), and_gate(O1[1], MEM_Register[1][i]),
       and_gate(O1[2], MEM_Register[2][i]), and_gate(O1[3], MEM_Register[3][i]),
       and_gate(O1[4], MEM_Register[4][i]), and_gate(O1[5], MEM_Register[5][i]),
@@ -904,6 +915,7 @@ void Read_Register(BIT* ReadRegister1, BIT* ReadRegister2,
       and_gate(O1[30], MEM_Register[30][i]), and_gate(O1[31], MEM_Register[31][i]));
   };
   for (int i = 0;i < 32;i++) {
+    // Take i^th bit of value stored at the register denoted by ReadRegister2
     ReadData2[i] = or_gate32(and_gate(O2[0], MEM_Register[0][i]), and_gate(O2[1], MEM_Register[1][i]),
       and_gate(O2[2], MEM_Register[2][i]), and_gate(O2[3], MEM_Register[3][i]),
       and_gate(O2[4], MEM_Register[4][i]), and_gate(O2[5], MEM_Register[5][i]),
@@ -925,13 +937,23 @@ void Read_Register(BIT* ReadRegister1, BIT* ReadRegister2,
 
 void Write_Register(BIT RegWrite, BIT* WriteRegister, BIT* WriteData)
 {
-  // IMPLEMENTED BY: TYLER
+  /*
+  This function writes the data passed in WriteData to the register
+  denoted by WriteRegister if RegWrite is set to 1.
+  */
   // Input: one 5-bit register address, data to write, and control bit
   // Output: None, but will modify register file
   BIT* O = malloc(32);
+  // Identify write register with 5-decoder
   decoder5(WriteRegister, O);
   for (int i = 0;i < 32;i++) {
     for (int j = 0;j < 32;j++) {
+      /*
+       With the multiplexors, we choose j^th bit of WriteData if
+       the i^th register corresponds to WriteRegister. We then choose
+       between the contents of WriteData and the original contents
+       depending on the value of RegWrite.
+       */
       MEM_Register[i][j] = multiplexor2(RegWrite, MEM_Register[i][j],
         multiplexor2(O[i], MEM_Register[i][j], WriteData[j]));
     }
@@ -942,13 +964,16 @@ void Write_Register(BIT RegWrite, BIT* WriteRegister, BIT* WriteData)
 void ALU_Control(BIT* ALUOp, BIT* funct, BIT* ALUControl)
 {
   /*
-  - IMPLEMENTED BY: TYLER
-  - Use SOP on each bit
+  This function sets the four ALU control bits based on the
+  ALU operation and funct bits derived from the current instruction.
+  */
+  /*
+  - Use SOP expression on each bit
   - Input: 2-bit ALUOp from main control circuit, 6-bit funct field from the
      binary instruction
   - Output:4-bit ALUControl for input into the ALU
-  - Note: SOP used to set ALUControl bits
-  -- TODO: Account for addi instruction here (which has ALUOp = 11 = 3)
+  - Note that the SOP expressions are derived from Figrue 4.13 on
+    page 273 of the text.
   */
   ALUControl[2] = and_gate(ALUOp[0], not_gate(ALUOp[1]))
     || and_gate6(not_gate(ALUOp[0]), ALUOp[1], not_gate(funct[0]), funct[1], not_gate(funct[2]), not_gate(funct[3]))
@@ -964,16 +989,21 @@ void ALU_Control(BIT* ALUOp, BIT* funct, BIT* ALUControl)
 
 void ALU(BIT* ALUControl, BIT* Input1, BIT* Input2, BIT* Zero, BIT* Result)
 {
-  //IMPLEMENTED BY: TYLER
+  /* This function implements the 32-bit ALU in the full datapath.*/
+  // Input: 4-bit ALUControl, two 32-bit inputs
+  // Output: 32-bit result, and zero flag big
+  // Note that most of the solution is from lab 6.
+  // Initialize LESS, SET, and CarryOut bits
   BIT Less = FALSE;
   BIT Set = FALSE;
   BIT CarryOut = 0;
   BIT Op0 = ALUControl[0];
   BIT Op1 = ALUControl[1];
-  /*ALUControl[2] = 1 for sub and slt instructions;
-    therefore serves as CarryIn and Binvert bit*/
+  // ALUControl[2] = 1 for sub and slt instructions
+  // These require CarryIn and Binvert to be set to 1
   BIT CarryIn = ALUControl[2];
   BIT Binvert = ALUControl[2];
+  // Note the use of a 32-bit ripple adder using 1-bit ALUs
   ALU1(Input1[0], Input2[0], Binvert, CarryIn, Less,
     Op0, Op1, &Result[0], &CarryOut, &Set);
   *Zero = Result[0];
@@ -987,22 +1017,24 @@ void ALU(BIT* ALUControl, BIT* Input1, BIT* Input2, BIT* Zero, BIT* Result)
   Less = Set;
   ALU1(Input1[0], Input2[0], Binvert, CarryIn, Less,
     Op0, Op1, &Result[0], &CarryOut, &Set);
-  // TODO: Implement 32-bit ALU
-  // Input: 4-bit ALUControl, two 32-bit inputs
-  // Output: 32-bit result, and zero flag big
-  // Note: Can re-use prior implementations (but need new circuitry for zero)
 }
 
 void Data_Memory(BIT MemWrite, BIT MemRead,
   BIT* Address, BIT* WriteData, BIT* ReadData)
 {
-  // Implemented by: Rachel & Tyler
+  /*
+  This function retrives from and writes to Data Memory based on the
+  given control signals MemWrite and MemRead.
+  */
   // Input: 32-bit address, control flags for read/write, and data to write
   // Output: data read if processing a lw instruction
-  // Note: Implementation similar as above
+
+  // Note: Read implementation similar to Register_Read
   BIT* O = malloc(32);
+  // Identify target address with 5-decoder
   decoder5(Address, O);
   for (int i = 0;i < 32;i++) {
+    // Read data from memory if MemRead is set to 1
     ReadData[i] = and_gate(MemRead, or_gate32(and_gate(O[0], MEM_Data[0][i]), and_gate(O[1], MEM_Data[1][i]),
       and_gate(O[2], MEM_Data[2][i]), and_gate(O[3], MEM_Data[3][i]),
       and_gate(O[4], MEM_Data[4][i]), and_gate(O[5], MEM_Data[5][i]),
@@ -1020,8 +1052,10 @@ void Data_Memory(BIT MemWrite, BIT MemRead,
       and_gate(O[28], MEM_Data[28][i]), and_gate(O[29], MEM_Data[29][i]),
       and_gate(O[30], MEM_Data[30][i]), and_gate(O[31], MEM_Data[31][i])));
   };
+  // Note: Implementation similar to Register_Write
   for (int i = 0;i < 32;i++) {
     for (int j = 0;j < 32;j++) {
+      // Write to memory if MemWrite is set to 1
       MEM_Data[i][j] = multiplexor2(MemWrite, MEM_Data[i][j],
         multiplexor2(O[i], MEM_Data[i][j], WriteData[j]));
     }
@@ -1031,8 +1065,8 @@ void Data_Memory(BIT MemWrite, BIT MemRead,
 void Extend_Sign16(BIT* Input, BIT* Output)
 {
   /*
-  IMPLEMENTED BY: TYLER
-  -- Fill higher 16 bits with MSB of input
+  This function extends the a 16-bit input to 32-bits.
+  -- Fill higher 16 bits with MSB of 16-bit input
   */
   for (int i = 0;i < 16;i++) {
     Output[i] = Input[i];
@@ -1044,13 +1078,13 @@ void Extend_Sign16(BIT* Input, BIT* Output)
 
 void updateState()
 {
-  //PARTIAL IMPLEMENTATION BY: TYLER
+  /* This function modifies and progresses the state of the datapath,
+  moving between instructions and storing data as the given MIPS
+  instructions specify.
+  */
 
-  // Essentially, you'll be figuring out the order in which to process each of
-  // the sub-circuits comprising the entire processor circuit. It makes it
-  // easier to consider the pipelined version of the process, and handle things
-  // in order of the pipeline. The stages and operations are:
   // Prematurely get next instruction value for jal instruction
+  // Irrelevant Zero flag (thus labeled garbage)
   BIT ZeroGarbage = 0;
   BIT* newPC = malloc(32);
   BIT ALUControlAdd[4] = { 0,1,0,0 };
@@ -1058,18 +1092,32 @@ void updateState()
   // Fetch - load instruction from instruction memory
   BIT* Instruction = malloc(32);
   Instruction_Memory(PC, Instruction);
-  BIT OpCode[6] = { Instruction[26], Instruction[27], Instruction[28], Instruction[29], Instruction[30], Instruction[31] };
-  //R-type & I-type
-  BIT rs1[5] = { Instruction[21], Instruction[22], Instruction[23], Instruction[24], Instruction[25] };
-  //R-type Instruction bits
-  BIT rs2[5] = { Instruction[16], Instruction[17], Instruction[18], Instruction[19], Instruction[20] };
-  BIT rd[5] = { Instruction[11], Instruction[12], Instruction[13], Instruction[14], Instruction[15] };
-  //BIT shamt[5] = { Instruction[6], Instruction[7], Instruction[8], Instruction[9], Instruction[10] };
-  BIT funct[6] = { Instruction[0], Instruction[1], Instruction[2], Instruction[3], Instruction[4], Instruction[5] };
+  // Opcode bits in the same location for all instructions
+  BIT OpCode[6] = { Instruction[26], Instruction[27], Instruction[28],
+  Instruction[29], Instruction[30], Instruction[31] };
+
+  // R-type & I-type
+  // First source register in the same location for I-type and R-type instrucitons
+  BIT rs1[5] = { Instruction[21], Instruction[22], Instruction[23],
+  Instruction[24], Instruction[25] };
+
+  //R-type Instruction bits 
+  BIT rs2[5] = { Instruction[16], Instruction[17], Instruction[18],
+  Instruction[19], Instruction[20] };
+  BIT rd[5] = { Instruction[11], Instruction[12], Instruction[13],
+  Instruction[14], Instruction[15] };
+  //Note that shamt is unused
+  BIT funct[6] = { Instruction[0], Instruction[1], Instruction[2],
+   Instruction[3], Instruction[4], Instruction[5] };
+
   //I-type
-  BIT Immediate[16] = { Instruction[0], Instruction[1], Instruction[2], Instruction[3], Instruction[4],
-      Instruction[5], Instruction[6], Instruction[7], Instruction[8], Instruction[9], Instruction[10],
-      Instruction[11], Instruction[12], Instruction[13], Instruction[14], Instruction[15] };
+  BIT Immediate[16] = { Instruction[0], Instruction[1], Instruction[2],
+   Instruction[3], Instruction[4],
+      Instruction[5], Instruction[6], Instruction[7], Instruction[8],
+       Instruction[9], Instruction[10],
+      Instruction[11], Instruction[12], Instruction[13], Instruction[14],
+       Instruction[15] };
+
   //J-type
   BIT ImmediateJ[26] = { Instruction[0], Instruction[1], Instruction[2], Instruction[3], Instruction[4],
       Instruction[5], Instruction[6], Instruction[7], Instruction[8], Instruction[9], Instruction[10],
@@ -1077,56 +1125,76 @@ void updateState()
       Instruction[17], Instruction[18], Instruction[19], Instruction[20], Instruction[21], Instruction[22],
       Instruction[23], Instruction[24], Instruction[25] };
   // Decode - set control bits and read from the register file
-  //Get write register
+
+  //Set control bits
   Control(OpCode, funct,
     &RegDst0, &RegDst1, &Jump, &Branch, &MemRead, &MemToReg0,
     &MemToReg1, ALUOp, &MemWrite, &ALUSrc, &RegWrite, &JumpReg);
-  //printf("RegDST0: %d, RegDST1: %d\n", RegDst0, RegDst1);
-  //printf("MemToReg0: %d, MemToReg1: %d, MemRead: %d, MemWrite: %d\n", MemToReg0, MemToReg1, MemRead, MemWrite);
+  //Set ALU control bits
   BIT* ALUControl = malloc(4);
   ALU_Control(ALUOp, funct, ALUControl);
+  //Sign extend the I-type immediate value
   BIT* ImmediateExtended = malloc(32);
   Extend_Sign16(Immediate, ImmediateExtended);
+  //Read data from registers
   BIT* ReadData1 = malloc(32);
   BIT* ReadData2 = malloc(32);
   Read_Register(rs1, rs2, ReadData1, ReadData2);
   BIT RegRA[5] = { 1,1,1,1,1 };
+  //Potentially write to the write register
   BIT* WriteRegister = malloc(32);
   for (int i = 0;i < 5;i++) {
+    // For jal, we store the address of the next instruction to register 31
+    // Otherwise, we choose between bits 11-15 or bits 16-20
     WriteRegister[i] = multiplexor4(RegDst0, RegDst1, rs2[i], rd[i], RegRA[i], 0);
   }
   // Execute - process ALU
   BIT* src1 = malloc(32);
   copy_bits(ReadData1, src1);
   BIT* src2 = malloc(32);
+  // Choose second ALU source (ReadData2 or the immediate value)
   for (int i = 0;i < 32;i++) {
     src2[i] = multiplexor2(ALUSrc, ReadData2[i], ImmediateExtended[i]);
   }
   BIT* Result = malloc(32);
   BIT Zero = 0;
+  // Perform ALU operation
   ALU(ALUControl, src1, src2, &Zero, Result);
   // Memory - read/write data memory
   BIT* ReadData = malloc(32);
-  //DEBUG REMOVE MEMREAD CHANGE
+  // Potentially read & write from data memory
   Data_Memory(MemWrite, MemRead, Result, ReadData2, ReadData);
   // Write Back - write to the register file
   BIT* WriteData = malloc(32);
+  // Identify write data
   for (int i = 0;i < 32;i++) {
+    // Choose between data read from D-mem and the ALU result
     WriteData[i] = multiplexor4(MemToReg0, MemToReg1, Result[i], ReadData[i], newPC[i], 0);
   }
+  // Write back to the write register if RegWrite = 1
   Write_Register(RegWrite, WriteRegister, WriteData);
   // Update PC - determine the final PC value for the next instruction
+
   // Branching and jumping
   BIT* BranchAddress = malloc(32);
+  // Offset next PC value by branch address
   ALU(ALUControlAdd, ImmediateExtended, newPC, &ZeroGarbage, BranchAddress);
   BIT* JumpAddress = malloc(32);
   copy_bits(ImmediateJ, JumpAddress);
+  /*
+   As the top 4 bits come from PC, where the top
+   4 bits from PC are always 0, we jsut set the upper
+   6 bits of the JumpAddress to 0 as we don't shift
+   left by 2 either.*/
   for (int i = 26;i < 32;i++) {
     JumpAddress[i] = 0;
   }
   BIT* BaseAddress = malloc(32);
+  // Determine if we should branch
   BIT shouldBranch = and_gate(Zero, Branch);
+  // If we should branch, set the PC to the branch address
   multiplexor2_32(shouldBranch, newPC, BranchAddress, BaseAddress);
+  // If we should jump, set PC to the jump address
   multiplexor2_32(Jump, BaseAddress, JumpAddress, PC);
   // Jump back to address in ReadData1 if JumpReg = 1
   multiplexor2_32(JumpReg, PC, ReadData1, PC);
@@ -1153,7 +1221,6 @@ int main()
 {
 
   setbuf(stdout, NULL);
-  //Read register test
   // parse instructions into binary format
   int counter = get_instructions(MEM_Instruction);
   // load program and run
