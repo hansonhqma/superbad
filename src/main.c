@@ -362,7 +362,7 @@ int binary_to_integer(BIT* A)
 // TODO: Implement any helper functions to assist with parsing
 int get_opcode(char* instruction)
 {
-  /* This function retrives the integer opcode from the
+  /* This function retrieves the integer opcode from the
      instruction string using string comparisons.
   */
   if (strcmp(instruction, "lw") == 0)
