@@ -968,7 +968,7 @@ void ALU_Control(BIT* ALUOp, BIT* funct, BIT* ALUControl)
   - Input: 2-bit ALUOp from main control circuit, 6-bit funct field from the
      binary instruction
   - Output:4-bit ALUControl for input into the ALU
-  - Note that the SOP expressions are derived from Figrue 4.13 on
+  - Note that the SOP expressions are derived from Figure 4.13 on
     page 273 of the text.
   */
   ALUControl[2] = and_gate(ALUOp[0], not_gate(ALUOp[1]))
