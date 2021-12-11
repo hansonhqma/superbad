@@ -362,7 +362,7 @@ int binary_to_integer(BIT* A)
 // TODO: Implement any helper functions to assist with parsing
 int get_opcode(char* instruction)
 {
-  /* This function retrives the integer opcode from the
+  /* This function retrieves the integer opcode from the
      instruction string using string comparisons.
   */
   if (strcmp(instruction, "lw") == 0)
@@ -880,7 +880,7 @@ void Read_Register(BIT* ReadRegister1, BIT* ReadRegister2,
   BIT* ReadData1, BIT* ReadData2)
 {
   /*
-  This function retrives the data from the two 5-bit
+  This function retrieves the data from the two 5-bit
   inputs passed and stores that data in ReadData1 and
   ReadData2, respectively.
   */
@@ -1019,7 +1019,7 @@ void Data_Memory(BIT MemWrite, BIT MemRead,
   BIT* Address, BIT* WriteData, BIT* ReadData)
 {
   /*
-  This function retrives from and writes to Data Memory based on the
+  This function retrieves from and writes to Data Memory based on the
   given control signals MemWrite and MemRead.
   */
   // Input: 32-bit address, control flags for read/write, and data to write
