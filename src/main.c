@@ -413,10 +413,6 @@ int get_register_number(char* reg)
   {
     return 2;
   }
-  else if (strcmp(reg, "a0") == 0)
-  {
-    return 4;
-  }
   else if (strcmp(reg, "t0") == 0)
   {
     return 8;
