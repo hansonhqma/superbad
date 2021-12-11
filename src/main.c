@@ -194,7 +194,7 @@ BIT nand_gate(BIT A, BIT B)
 
 void decoder2(BIT I0, BIT I1, BIT* O0, BIT* O1, BIT* O2, BIT* O3)
 {
-  // 2-input decoder implmented in labs 5 & 6
+  // 2-input decoder implemented in labs 5 & 6
   *O0 = and_gate(not_gate(I1), not_gate(I0));
   *O1 = and_gate(not_gate(I1), I0);
   *O2 = and_gate(I1, not_gate(I0));
@@ -204,7 +204,7 @@ void decoder2(BIT I0, BIT I1, BIT* O0, BIT* O1, BIT* O2, BIT* O3)
 }
 void decoder3(BIT* I, BIT EN, BIT* O)
 {
-  // 3-input decoder implmented in labs 5 & 6
+  // 3-input decoder implemented in labs 5 & 6
   O[0] = and_gate3(not_gate(I[2]), not_gate(I[1]), not_gate(I[0]));
   O[1] = and_gate3(not_gate(I[2]), not_gate(I[1]), I[0]);
   O[2] = and_gate3(not_gate(I[2]), I[1], not_gate(I[0]));
@@ -229,7 +229,7 @@ void decoder3(BIT* I, BIT EN, BIT* O)
 void decoder5(BIT* I, BIT* O)
 {
   /*
-    -- 5-input decoder implmented in labs 5 & 6
+    -- 5-input decoder implemented in labs 5 & 6
     -- Note the use of a 2-decoder to set enabler bits
     -- 3-decoders used to set output bits in 8-step increments
   */
@@ -246,7 +246,7 @@ void decoder5(BIT* I, BIT* O)
 
 BIT multiplexor2(BIT S, BIT I0, BIT I1)
 {
-  // 1-input multiplexor implmented in labs 5 & 6
+  // 1-input multiplexor implemented in labs 5 & 6
   BIT x0 = and_gate(not_gate(S), I0);
   BIT x1 = and_gate(S, I1);
   return or_gate(x0, x1);
@@ -265,7 +265,7 @@ void multiplexor2_32(BIT S, BIT* I0, BIT* I1, BIT* Output)
 
 BIT multiplexor4(BIT S0, BIT S1, BIT I0, BIT I1, BIT I2, BIT I3)
 {
-  // 2-input multiplexor implmented in labs 5 & 6
+  // 2-input multiplexor implemented in labs 5 & 6
   BIT x0, x1, x2, x3 = FALSE;
   decoder2(S0, S1, &x0, &x1, &x2, &x3);
 
@@ -281,7 +281,7 @@ BIT multiplexor4(BIT S0, BIT S1, BIT I0, BIT I1, BIT I2, BIT I3)
 }
 void adder1(BIT A, BIT B, BIT CarryIn, BIT* CarryOut, BIT* Sum)
 {
-  // 1-bit adder implmented in lab 5
+  // 1-bit adder implemented in lab 5
   BIT x0 = xor_gate(A, B);
   *Sum = xor_gate(CarryIn, x0);
 
@@ -1093,7 +1093,7 @@ void updateState()
   Instruction[29], Instruction[30], Instruction[31] };
 
   // R-type & I-type
-  // First source register in the same location for I-type and R-type instrucitons
+  // First source register in the same location for I-type and R-type instructions
   BIT rs1[5] = { Instruction[21], Instruction[22], Instruction[23],
   Instruction[24], Instruction[25] };
 
@@ -1179,7 +1179,7 @@ void updateState()
   copy_bits(ImmediateJ, JumpAddress);
   /*
    As the top 4 bits come from PC, where the top
-   4 bits from PC are always 0, we jsut set the upper
+   4 bits from PC are always 0, we just set the upper
    6 bits of the JumpAddress to 0 as we don't shift
    left by 2 either.*/
   for (int i = 26;i < 32;i++) {
